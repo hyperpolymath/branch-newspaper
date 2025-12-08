@@ -1,0 +1,361 @@
+= Branch Newspaper Roadmap
+:toc: left
+:toclevels: 3
+:icons: font
+:source-highlighter: highlight.js
+
+== Overview
+
+This document outlines the development roadmap for Branch Newspaper, from the current state to MVP v1.0 deployment and beyond.
+
+Branch Newspaper is an Elixir/Phoenix application for managing and distributing meeting minutes with IPFS integration for decentralized content storage.
+
+== Current State
+
+=== Completed Infrastructure
+* [x] Phoenix 1.8.1 application scaffold
+* [x] SQLite3 database with Ecto
+* [x] Phoenix LiveView for real-time UI
+* [x] IPFS client integration (Kubo)
+* [x] Basic CRUD for Minutes
+* [x] CI/CD pipelines (GitHub Actions + GitLab CI)
+* [x] Repository mirroring setup
+* [x] Dependabot configuration
+* [x] CodeQL security scanning
+
+=== Technical Stack
+|===
+| Component | Technology | Version
+
+| Language | Elixir | ~> 1.15
+| Framework | Phoenix | ~> 1.8.1
+| Real-time | Phoenix LiveView | ~> 1.1.0
+| Database | SQLite3/Ecto | ~> 3.12
+| Storage | IPFS (Kubo) | v0.24.0
+| CSS | Tailwind CSS | v4.1
+| Build | Mix, esbuild | Latest
+|===
+
+== Route to MVP v1.0
+
+=== Phase 1: Foundation Hardening (Week 1-2)
+
+==== Security & Quality
+* [ ] Remove sensitive files from repository
+** SQLite database files
+** Binary tarballs (Kubo)
+* [ ] Add security analysis tools
+** Sobelow for Phoenix security
+** Credo for code quality
+* [ ] Implement proper secret management
+** Externalize all configuration
+** Document required environment variables
+
+==== Testing
+* [ ] Add missing test coverage
+** IPFS client service tests
+** Integration tests for content flow
+* [ ] Set up coverage reporting (ExCoveralls)
+* [ ] Achieve 80%+ code coverage
+
+==== Documentation
+* [ ] Comprehensive README.md
+** Setup instructions
+** Development workflow
+** Configuration guide
+* [ ] API documentation
+* [ ] Architecture overview
+
+=== Phase 2: Feature Completion (Week 3-4)
+
+==== Core Features
+* [ ] Complete Minutes management
+** List with pagination
+** Search/filter functionality
+** Tag-based organization
+* [ ] IPFS content lifecycle
+** Upload with verification
+** Pinning management
+** Content retrieval with caching
+
+==== User Experience
+* [ ] Loading states and feedback
+* [ ] Error handling and messaging
+* [ ] Responsive design polish
+* [ ] Accessibility audit (WCAG 2.1 AA)
+
+=== Phase 3: Production Readiness (Week 5-6)
+
+==== Infrastructure
+* [ ] Docker containerization
+[source,dockerfile]
+----
+# Multi-stage Dockerfile
+FROM elixir:1.15-alpine AS builder
+# ... build steps ...
+
+FROM alpine:3.19 AS runner
+# ... runtime configuration ...
+----
+
+* [ ] Health check endpoints
+** `/health/live` - liveness probe
+** `/health/ready` - readiness probe
+* [ ] Structured logging (JSON format)
+* [ ] Prometheus metrics export
+
+==== Deployment
+* [ ] Staging environment setup
+** Fly.io or similar PaaS
+** Separate IPFS node
+* [ ] Database migration strategy
+** PostgreSQL for production
+** Migration scripts
+* [ ] SSL/TLS configuration
+* [ ] CDN for static assets
+
+=== Phase 4: MVP v1.0 Launch (Week 7-8)
+
+==== Pre-Launch Checklist
+* [ ] Security audit completed
+* [ ] Performance testing passed
+* [ ] Backup and recovery tested
+* [ ] Monitoring and alerting configured
+* [ ] Documentation reviewed
+
+==== Launch Tasks
+* [ ] Production environment provisioning
+* [ ] DNS configuration
+* [ ] SSL certificate setup
+* [ ] Initial data migration
+* [ ] Launch announcement
+
+==== Post-Launch
+* [ ] Monitor error rates
+* [ ] Track performance metrics
+* [ ] Gather user feedback
+* [ ] Hot-fix process documented
+
+== MVP v1.0 Features
+
+=== Included in MVP
+
+[cols="1,2,1"]
+|===
+| Feature | Description | Priority
+
+| Minutes CRUD
+| Create, read, update, delete meeting minutes
+| P0
+
+| IPFS Storage
+| Store minutes content on IPFS
+| P0
+
+| LiveView UI
+| Real-time updates without page reloads
+| P0
+
+| Basic Search
+| Search minutes by title and content
+| P1
+
+| Tags
+| Organize minutes with tags
+| P1
+
+| Date Filtering
+| Filter minutes by meeting date
+| P2
+|===
+
+=== Deferred to v1.1+
+
+* User authentication and authorization
+* Team/organization support
+* Rich text editor for content
+* File attachments
+* Email notifications
+* API for external integrations
+* Mobile app
+
+== Deployment Architecture
+
+=== MVP v1.0 Architecture
+
+[source]
+----
+┌─────────────────────────────────────────────────────────┐
+│                    Load Balancer                        │
+│                   (Fly.io/Cloudflare)                   │
+└─────────────────────┬───────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────┐
+│              Phoenix Application                        │
+│         ┌─────────────────────────────┐                 │
+│         │  Phoenix LiveView           │                 │
+│         │  - Real-time UI             │                 │
+│         │  - WebSocket connections    │                 │
+│         └─────────────────────────────┘                 │
+│         ┌─────────────────────────────┐                 │
+│         │  Business Logic             │                 │
+│         │  - Minutes management       │                 │
+│         │  - IPFS integration         │                 │
+│         └─────────────────────────────┘                 │
+└─────────────────────┬───────────────────────────────────┘
+                      │
+          ┌───────────┴───────────┐
+          ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐
+│   PostgreSQL    │    │   IPFS Node     │
+│   (Fly Postgres)│    │   (Kubo)        │
+└─────────────────┘    └─────────────────┘
+----
+
+=== Recommended Hosting Options
+
+[cols="1,2,2,1"]
+|===
+| Provider | Pros | Cons | Cost
+
+| Fly.io
+| Easy deployment, built-in PostgreSQL, global edge
+| Learning curve
+| ~$10-30/mo
+
+| Railway
+| Simple setup, managed databases
+| Less control
+| ~$5-20/mo
+
+| Render
+| Free tier, managed PostgreSQL
+| Cold starts on free tier
+| $0-25/mo
+
+| Self-hosted (VPS)
+| Full control, predictable costs
+| More maintenance
+| ~$5-20/mo
+|===
+
+== Risk Mitigation
+
+=== Technical Risks
+
+[cols="2,1,2,2"]
+|===
+| Risk | Impact | Mitigation | Status
+
+| IPFS node instability
+| High
+| Implement retry logic, consider pinning service backup
+| Planned
+
+| Database corruption
+| Critical
+| Automated backups, point-in-time recovery
+| Not started
+
+| Security vulnerability
+| Critical
+| Regular dependency updates, security scanning
+| In progress
+|===
+
+=== Process Risks
+
+[cols="2,1,2"]
+|===
+| Risk | Impact | Mitigation
+
+| Scope creep
+| Medium
+| Strict MVP feature list, defer nice-to-haves
+
+| Technical debt
+| Medium
+| Code reviews, regular refactoring sprints
+
+| Knowledge silos
+| Medium
+| Documentation, code comments
+|===
+
+== Success Metrics
+
+=== MVP Launch Criteria
+
+* All P0 features implemented and tested
+* 80%+ test coverage
+* No critical/high security issues
+* Documentation complete
+* Staging environment validated
+* Monitoring and alerting operational
+
+=== Post-Launch KPIs
+
+[cols="1,2,1"]
+|===
+| Metric | Target | Measurement
+
+| Uptime
+| 99.5%
+| Monitoring alerts
+
+| Response Time (p95)
+| < 200ms
+| APM metrics
+
+| Error Rate
+| < 1%
+| Error tracking
+
+| IPFS Success Rate
+| > 99%
+| Custom metrics
+|===
+
+== Future Roadmap (Post-MVP)
+
+=== v1.1 - User Management
+* User authentication (OAuth2/OIDC)
+* Role-based access control
+* Audit logging
+
+=== v1.2 - Collaboration
+* Real-time collaborative editing
+* Comments and annotations
+* Email notifications
+
+=== v1.3 - Integration
+* REST API
+* Webhooks
+* Export formats (PDF, DOCX)
+
+=== v2.0 - Enterprise
+* Multi-tenancy
+* Custom branding
+* Advanced analytics
+* SLA guarantees
+
+== Resources
+
+=== Documentation
+* link:README.md[README] - Getting started
+* link:TODO.md[TODO] - Task backlog
+* link:SECRETS.md[SECRETS] - Configuration secrets
+* link:AGENTS.md[AGENTS] - AI coding guidelines
+
+=== External Links
+* https://hexdocs.pm/phoenix/overview.html[Phoenix Framework Documentation]
+* https://hexdocs.pm/phoenix_live_view/Phoenix.LiveView.html[Phoenix LiveView Guide]
+* https://docs.ipfs.tech/[IPFS Documentation]
+* https://www.erlang.org/doc/[Erlang/OTP Documentation]
+
+---
+
+_Document Version: 1.0.0_
+_Last Updated: 2025-12-08_
+_Status: Active Development_

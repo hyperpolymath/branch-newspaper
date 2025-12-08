@@ -1,0 +1,151 @@
+# GitLab CI Configuration for Branch Newspaper
+# This pipeline calls shared scripts in ci-scripts/ for consistency with GitHub Actions
+
+stages:
+  - lint
+  - test
+  - build
+  - deploy
+
+variables:
+  MIX_ENV: test
+  ELIXIR_VERSION: "1.15.7"
+  OTP_VERSION: "26.2"
+
+# Cache dependencies between jobs
+.cache_template: &cache_template
+  cache:
+    key:
+      files:
+        - mix.lock
+    paths:
+      - deps/
+      - _build/
+
+# Base template for Elixir jobs
+.elixir_template: &elixir_template
+  image: elixir:${ELIXIR_VERSION}
+  before_script:
+    - mix local.hex --force
+    - mix local.rebar --force
+    - mix deps.get
+
+# Lint job
+lint:
+  <<: *elixir_template
+  <<: *cache_template
+  stage: lint
+  script:
+    - chmod +x ./ci-scripts/*.sh
+    - ./ci-scripts/lint.sh
+  allow_failure: false
+
+# Test job - Primary version
+test:
+  <<: *elixir_template
+  <<: *cache_template
+  stage: test
+  script:
+    - chmod +x ./ci-scripts/*.sh
+    - ./ci-scripts/setup.sh
+    - ./ci-scripts/test.sh
+  artifacts:
+    when: always
+    reports:
+      junit: _build/test/lib/branch_newspaper/test-junit-report.xml
+    expire_in: 1 week
+
+# Test job - Matrix for additional Elixir versions
+test:elixir-1.16:
+  <<: *elixir_template
+  <<: *cache_template
+  stage: test
+  image: elixir:1.16.0
+  script:
+    - chmod +x ./ci-scripts/*.sh
+    - ./ci-scripts/setup.sh
+    - ./ci-scripts/test.sh
+  allow_failure: true
+
+test:elixir-1.15-minimum:
+  <<: *elixir_template
+  <<: *cache_template
+  stage: test
+  image: elixir:1.15.0
+  script:
+    - chmod +x ./ci-scripts/*.sh
+    - ./ci-scripts/setup.sh
+    - ./ci-scripts/test.sh
+  allow_failure: true
+
+# Build release
+build:
+  <<: *elixir_template
+  stage: build
+  variables:
+    MIX_ENV: prod
+  cache:
+    key:
+      files:
+        - mix.lock
+      prefix: prod
+    paths:
+      - deps/
+      - _build/
+  script:
+    - chmod +x ./ci-scripts/*.sh
+    - ./ci-scripts/build.sh
+  artifacts:
+    paths:
+      - _build/prod/rel/branch_newspaper/
+    expire_in: 1 week
+  only:
+    - main
+    - master
+    - tags
+
+# Deploy to staging (manual trigger)
+deploy:staging:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client rsync
+  script:
+    - echo "Deploying to staging environment..."
+    - echo "This is a placeholder - configure actual deployment"
+  environment:
+    name: staging
+    url: https://staging.branch-newspaper.example.com
+  when: manual
+  only:
+    - main
+    - develop
+
+# Deploy to production (manual trigger, only on tags)
+deploy:production:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache openssh-client rsync
+  script:
+    - echo "Deploying to production environment..."
+    - echo "This is a placeholder - configure actual deployment"
+  environment:
+    name: production
+    url: https://branch-newspaper.example.com
+  when: manual
+  only:
+    - tags
+
+# Mirror verification (runs after pushes from GitHub)
+verify-mirror:
+  stage: test
+  image: alpine/git:latest
+  script:
+    - chmod +x ./ci-scripts/*.sh
+    - apk add --no-cache bash
+    - ./ci-scripts/verify-mirror.sh || true
+  only:
+    - main
+    - master
+  allow_failure: true

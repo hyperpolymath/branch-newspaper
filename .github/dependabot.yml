@@ -1,11 +1,64 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
+# Dependabot configuration for Branch Newspaper
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 
 version: 2
 updates:
-  - package-ecosystem: "" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  # Elixir/Mix dependencies
+  - package-ecosystem: "mix"
+    directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "elixir"
+    commit-message:
+      prefix: "deps(mix):"
+    groups:
+      phoenix:
+        patterns:
+          - "phoenix*"
+          - "plug*"
+      ecto:
+        patterns:
+          - "ecto*"
+      dev-deps:
+        patterns:
+          - "credo"
+          - "dialyxir"
+          - "sobelow"
+          - "ex_doc"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci(actions):"
+
+  # npm dependencies (if assets use npm)
+  - package-ecosystem: "npm"
+    directory: "/assets"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "javascript"
+    commit-message:
+      prefix: "deps(npm):"
+    ignore:
+      # Tailwind and esbuild are managed by Mix
+      - dependency-name: "tailwindcss"
+      - dependency-name: "esbuild"
