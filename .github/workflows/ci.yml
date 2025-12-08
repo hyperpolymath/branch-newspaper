@@ -127,7 +127,7 @@ jobs:
         run: ./ci-scripts/build.sh
 
       - name: Upload release artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: branch-newspaper-release
           path: _build/prod/rel/branch_newspaper/
