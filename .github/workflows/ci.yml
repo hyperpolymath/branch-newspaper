@@ -29,10 +29,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@v6.0.2
 
       - name: Setup Elixir
-        uses: erlef/setup-beam@ee09b1e59bb240681c382eb1f0abc6a04af72764 # v1
+        uses: erlef/setup-beam@v1.23.0
         with:
           elixir-version: ${{ env.ELIXIR_VERSION }}
 
@@ -40,7 +40,7 @@ jobs:
 
 
       - name: Cache deps
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
+        uses: actions/cache@v4.2.3
         with:
           path: |
             deps
@@ -80,10 +80,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@v6.0.2
 
       - name: Setup Elixir
-        uses: erlef/setup-beam@ee09b1e59bb240681c382eb1f0abc6a04af72764 # v1
+        uses: erlef/setup-beam@v1.23.0
         with:
           elixir-version: ${{ matrix.elixir }}
 
@@ -91,7 +91,7 @@ jobs:
 
 
       - name: Cache deps
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
+        uses: actions/cache@v4.2.3
         with:
           path: |
             deps
@@ -125,10 +125,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@v6.0.2
 
       - name: Setup Elixir
-        uses: erlef/setup-beam@ee09b1e59bb240681c382eb1f0abc6a04af72764 # v1
+        uses: erlef/setup-beam@v1.23.0
         with:
           elixir-version: ${{ env.ELIXIR_VERSION }}
 
@@ -136,7 +136,7 @@ jobs:
 
 
       - name: Cache deps
-        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4
+        uses: actions/cache@v4.2.3
         with:
           path: |
             deps
@@ -149,7 +149,7 @@ jobs:
         run: ./ci-scripts/build.sh
 
       - name: Upload release artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: branch-newspaper-release
           path: _build/prod/rel/branch_newspaper/
@@ -166,7 +166,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@v6.0.2
         with:
           fetch-depth: 0
 
